@@ -1,0 +1,955 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+               "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+lang="en" xml:lang="en">
+<head>
+<title>Puppet at Media Temple</title>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+<meta name="generator" content="Org-mode"/>
+<meta name="generated" content="2011-09-30 18:08:32 PDT"/>
+<meta name="author" content="Sharif Nassar"/>
+<meta name="description" content=""/>
+<meta name="keywords" content=""/>
+<!-- configuration parameters --> <meta name='defaultView' content='slideshow' /> <meta name='controlVis' content='hidden' /> <!-- style sheet links --> <link rel='stylesheet' href='ui/default/slides.css' type='text/css' media='projection' id='slideProj' /> <link rel='stylesheet' href='ui/default/outline.css' type='text/css' media='screen' id='outlineStyle' /> <link rel='stylesheet' href='ui/default/print.css' type='text/css' media='print' id='slidePrint' /> <link rel='stylesheet' href='ui/default/opera.css' type='text/css' media='projection' id='operaFix' /><!-- S5 JS --> <script src='ui/jquery.js' type='text/javascript'></script> <script src='ui/org-slides.js' type='text/javascript'></script> <script src='ui/default/slides.js' type='text/javascript'></script> <script src='ui/default/style.js' type='text/javascript'></script>
+<script type="text/javascript">
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+
+</head>
+<body>
+
+<div id="preamble">
+<div class='layout'>
+<div id='controls'></div>
+<div id='currentSlide'></div>
+<div id='header'></div>
+<div id='footer'><h1>Puppet at Media Temple </h1><h2>Sharif Nassar &#8226; 2011-09-22</h2></div>
+</div>
+<div class='presentation'>
+<div class='slide front'>
+  <div id='front-logo'></div>
+<h1 class='front'>Puppet at Media Temple</h1><h3>Sharif Nassar</h3></div>
+</div>
+
+<div id="content">
+<h1 class="title">Puppet at Media Temple</h1>
+
+
+<div id="outline-container-1" class="outline-2">
+<h2 id="sec-1">What we will cover &nbsp;&nbsp;&nbsp;<span class="tag"><span class="Incremental">Incremental</span></span></h2>
+<div class="outline-text-2" id="text-1">
+
+<ul>
+<li>Multimaster puppetmaster setup at Media Temple 
+</li>
+<li>Our puppet module development process
+</li>
+<li>Custom puppet functions we use
+</li>
+</ul>
+
+</div>
+
+</div>
+
+<div id="outline-container-2" class="outline-2">
+<h2 id="sec-2">Multimaster puppet &nbsp;&nbsp;&nbsp;<span class="tag"><span class="Incremental">Incremental</span></span></h2>
+<div class="outline-text-2" id="text-2">
+
+<p>Our HA puppetmaster configuration automagically configures:
+</p><ul>
+<li>Apache
+</li>
+<li>Passenger
+</li>
+<li>Puppet
+</li>
+<li>LVS
+</li>
+<li>Glusterfs
+</li>
+</ul>
+
+</div>
+
+</div>
+
+<div id="outline-container-3" class="outline-2">
+<h2 id="sec-3">Why we needed multiple puppetmasters &nbsp;&nbsp;&nbsp;<span class="tag"><span class="Incremental">Incremental</span></span></h2>
+<div class="outline-text-2" id="text-3">
+
+<ul>
+<li>About 1500 clients
+</li>
+<li>Lots of timeouts
+</li>
+<li>Long catalog compilation times
+</li>
+<li>Did I mention timeouts?
+</li>
+<li>Hard to watch puppet work when it takes 20 minutes to run a manifest
+</li>
+<li>Some semblance of HA is nice
+</li>
+</ul>
+
+</div>
+
+</div>
+
+<div id="outline-container-4" class="outline-2">
+<h2 id="sec-4">Apache / Passenger / Puppet configuration &nbsp;&nbsp;&nbsp;<span class="tag"><span class="Incremental">Incremental</span></span></h2>
+<div class="outline-text-2" id="text-4">
+
+<ul>
+<li>No rocket science here
+</li>
+<li>Installs Apache and Passenger
+</li>
+<li>Configures Apache virtual host
+</li>
+<li>Configures Passenger/Rack
+</li>
+<li>Configures Puppetmaster
+</li>
+<li>This should be the 'Hello World' of puppet modules
+</li>
+</ul>
+
+</div>
+
+</div>
+
+<div id="outline-container-5" class="outline-2">
+<h2 id="sec-5">Configuring HA &nbsp;&nbsp;&nbsp;<span class="tag"><span class="Incremental">Incremental</span></span></h2>
+<div class="outline-text-2" id="text-5">
+
+<ul>
+<li>We use <a href="http://www.linux-vs.org">LVS</a> and <a href="http://www.keepalived.org/">Keepalived</a>
+</li>
+<li>LVS runs on each puppetmaster
+</li>
+<li>The shared IP lives on only the 'primary' puppetmaster
+</li>
+<li>Stopping Apache removes a node from puppetmaster duties for maintenance
+</li>
+</ul>
+
+</div>
+
+</div>
+
+<div id="outline-container-6" class="outline-2">
+<h2 id="sec-6">Keeping in sync &nbsp;&nbsp;&nbsp;<span class="tag"><span class="Incremental">Incremental</span></span></h2>
+<div class="outline-text-2" id="text-6">
+
+<ul>
+<li>Sure that's great, but now I have to install puppet modules on <i>n</i> puppetmasters?
+</li>
+<li>Nope, we deploy all our puppet code as Debian packages
+</li>
+<li>We have a shared filesystem, so we only have to do it once
+</li>
+<li>pm_maint script to:
+<ul>
+<li>Drop a node out of the load balancer (stop apache)
+</li>
+<li>Jabber internally ("chunga put pm01 in maintenance mode")
+</li>
+<li>Syslog whodunit
+</li>
+<li>Remount the shared filesystem so we can update packages
+</li>
+</ul>
+
+</li>
+<li>Also, we have a cron job that automatically adds a node back into
+  LVS after 15 minutes for when people forget
+</li>
+</ul>
+
+</div>
+
+</div>
+
+<div id="outline-container-7" class="outline-2">
+<h2 id="sec-7">Shared filesystem you say? &nbsp;&nbsp;&nbsp;<span class="tag"><span class="Incremental">Incremental</span></span></h2>
+<div class="outline-text-2" id="text-7">
+
+<ul>
+<li>A little bit more resilience, and less maintenance
+</li>
+<li>We only have to deploy code to one place
+</li>
+<li>We store /etc/puppet in the shared filesystem
+<ul>
+<li>All our puppet code
+</li>
+<li>CA certs
+</li>
+<li>Client cert requests
+</li>
+<li>Client reports
+</li>
+</ul>
+
+</li>
+</ul>
+
+</div>
+
+</div>
+
+<div id="outline-container-8" class="outline-2">
+<h2 id="sec-8">Enter GlusterFS &nbsp;&nbsp;&nbsp;<span class="tag"><span class="Incremental">Incremental</span></span></h2>
+<div class="outline-text-2" id="text-8">
+
+<ul>
+<li>We're too innovative (cheap) for dedicated shared storage (eg: NetApp)
+</li>
+<li>So we picked <a href="http://www.gluster.org">GlusterFS</a>
+</li>
+<li>But it can be kind of slow with our configuration
+</li>
+<li>Or puppet or our puppet plugins are doing it wrong 
+<ul>
+<li>500k stat(2) calls per agent run
+</li>
+</ul>
+
+</li>
+<li>We cheated a bit and use a read-only bind mount of
+  /etc/puppet/manifests
+</li>
+<li>Bypasses all the coherency checking Gluster does to make it usable,
+  since we are talking to a local 'copy' and not the shared volume
+</li>
+</ul>
+
+</div>
+
+</div>
+
+<div id="outline-container-9" class="outline-2">
+<h2 id="sec-9">Bind mounts </h2>
+<div class="outline-text-2" id="text-9">
+
+<p>/etc/fstab looks like this
+</p><pre class="example">
+/etc/glusterfs/puppet.vol /etc/puppet glusterfs defaults
+/var/gluster/manifests    /etc/puppet/manifests bind  ro,bind
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-10" class="outline-2">
+<h2 id="sec-10">What it looks like </h2>
+<div class="outline-text-2" id="text-10">
+
+<p><img src="pix/puppet_master.png"  alt="pix/puppet_master.png" />
+</p></div>
+
+</div>
+
+<div id="outline-container-11" class="outline-2">
+<h2 id="sec-11">Effect on load </h2>
+<div class="outline-text-2" id="text-11">
+
+<ul>
+<li>Here is the nice pretty picture of load average over time
+</li>
+</ul>
+
+<p><img src="pix/pm_load_avg.png"  alt="pix/pm_load_avg.png" />
+</p><ul>
+<li>Unfortunately, we do not have a good history of the more interesting data like
+  catalog compilation times
+</li>
+</ul>
+
+</div>
+
+</div>
+
+<div id="outline-container-12" class="outline-2">
+<h2 id="sec-12">Deploying code &nbsp;&nbsp;&nbsp;<span class="tag"><span class="Incremental">Incremental</span></span></h2>
+<div class="outline-text-2" id="text-12">
+
+<p>Set the stage:
+</p><pre class="example">
+aptitude update
+pm_maint begin
+</pre>
+
+<p>One can now write directly to /etc/puppet:
+</p><pre class="example">
+aptitude install puppet-module-keepalived
+pm_maint end
+</pre>
+
+<p>Since Gluster is always live and in a RAID-1 configuration, changes
+made in maintenance mode are almost immediately propagated to all
+puppet masters.
+So far, this has not been an issue.
+</p></div>
+
+</div>
+
+<div id="outline-container-13" class="outline-2">
+<h2 id="sec-13">Pros </h2>
+<div class="outline-text-2" id="text-13">
+
+<ul>
+<li>It works
+</li>
+<li>It is really easy to add more puppetmasters
+</li>
+<li>Way cheaper than NetApp
+</li>
+</ul>
+
+</div>
+
+</div>
+
+<div id="outline-container-14" class="outline-2">
+<h2 id="sec-14">Cons </h2>
+<div class="outline-text-2" id="text-14">
+
+<ul>
+<li>Only one puppetmaster has an accurate list of installed
+   puppet-module-&lt;foo&gt; packages.  In practice, this is not an actual
+   problem.
+</li>
+<li>It would be simpler if we didn't have to cheat GlusterFS with the
+   bind mounts.
+</li>
+<li>It would be nice if we had proper shared storage.  That could be
+   simpler than GlusterFS.
+</li>
+</ul>
+
+</div>
+
+</div>
+
+<div id="outline-container-15" class="outline-2">
+<h2 id="sec-15">Our puppet module dev/test process &nbsp;&nbsp;&nbsp;<span class="tag"><span class="Incremental">Incremental</span></span></h2>
+<div class="outline-text-2" id="text-15">
+
+<ul>
+<li>Packaging / continuous integration of puppet modules as packages
+</li>
+<li>Jenkins will build each puppet module to a .deb &amp; .rpm
+</li>
+<li>Jenkins tests for syntax errors
+<ul>
+<li>In *.pp (seemingly broken in puppet 2.6 - whichever version ships
+   with Debian Squeeze)
+</li>
+<li>In all templates
+</li>
+<li>Could easily test libs/plugins
+</li>
+</ul>
+
+</li>
+</ul>
+
+</div>
+
+</div>
+
+<div id="outline-container-16" class="outline-2">
+<h2 id="sec-16">Developing puppet modules &nbsp;&nbsp;&nbsp;<span class="tag"><span class="Incremental">Incremental</span></span></h2>
+<div class="outline-text-2" id="text-16">
+
+<ul>
+<li>Spin up a VMs and run the 'dev' variant of the puppet module
+</li>
+<li>Our puppet modules are installed on the dev host
+</li>
+<li>No puppetmaster in dev
+</li>
+<li>Hack hack hack
+</li>
+<li>Merge changes back to the production branch
+</li>
+<li>Jenkins builds packages and automatically jams them in our package
+  repositories
+</li>
+</ul>
+
+</div>
+
+</div>
+
+<div id="outline-container-17" class="outline-2">
+<h2 id="sec-17">Testing before deploying &nbsp;&nbsp;&nbsp;<span class="tag"><span class="Incremental">Incremental</span></span></h2>
+<div class="outline-text-2" id="text-17">
+
+<ul>
+<li>The dev environment <b>should</b> match production.
+</li>
+<li>But in reality, it might not.
+</li>
+<li>It's always nice to test new features on a few hosts manually from
+  the testing environment before deploying the new puppet module to
+  the entire datacenter
+</li>
+</ul>
+
+</div>
+
+</div>
+
+<div id="outline-container-18" class="outline-2">
+<h2 id="sec-18">Testing before deploying &nbsp;&nbsp;&nbsp;<span class="tag"><span class="Incremental">Incremental</span></span></h2>
+<div class="outline-text-2" id="text-18">
+
+<ul>
+<li>We used to just have one testing environment shared by all
+  developers
+</li>
+<li>People forgot to clean up after themselves
+</li>
+<li>Sometimes two people would be working on same or related modules and
+  confuse each other
+</li>
+</ul>
+
+</div>
+
+</div>
+
+<div id="outline-container-19" class="outline-2">
+<h2 id="sec-19">Testing before deploying &nbsp;&nbsp;&nbsp;<span class="tag"><span class="Incremental">Incremental</span></span></h2>
+<div class="outline-text-2" id="text-19">
+
+<ul>
+<li>So we have a last chance test environment
+</li>
+</ul>
+
+
+
+
+<pre class="example">puppetd --test --no-splay --noop \
+  --environment ${USER}\_testing
+</pre>
+
+
+<ul>
+<li>Where does the <i>${USER}_testing</i> environment come from ?
+</li>
+<li>First, the puppet module that builds puppet masters creates
+  /etc/puppet/environments/${USER}_testing for each of our configured users.
+</li>
+<li>Second, yet another handy helper script called <b>penv</b>
+</li>
+<li>Penv is just a wrapper to install our puppet-module-&lt;foo&gt;
+  packages in /etc/puppet/environments/${USER}_testing
+</li>
+<li>Of course, the per-user environments all live on the GlusterFS
+  volume
+</li>
+</ul>
+
+</div>
+
+</div>
+
+<div id="outline-container-20" class="outline-2">
+<h2 id="sec-20">What is this 'dev' puppet module? </h2>
+<div class="outline-text-2" id="text-20">
+
+<ul>
+<li>We like to spin up instances of our applications for development
+</li>
+<li>So we use puppet to build them
+</li>
+<li>But we run into some problems
+</li>
+</ul>
+
+</div>
+
+</div>
+
+<div id="outline-container-21" class="outline-2">
+<h2 id="sec-21">Example: A database server </h2>
+<div class="outline-text-2" id="text-21">
+
+
+
+
+<pre class="example">class db_server {
+    $db_username = 'db123'
+    $db_password = 'somethingreallyhardtotype'
+
+    db_user { $db_username:
+        ensure =&gt; present,
+        password =&gt; $db_password,
+    }
+}
+</pre>
+
+
+</div>
+
+</div>
+
+<div id="outline-container-22" class="outline-2">
+<h2 id="sec-22">Example: A database client </h2>
+<div class="outline-text-2" id="text-22">
+
+
+
+
+<pre class="example">class app {
+    $db_username = 'db123'
+    $db_password = 'somethingreallyhardtotype'
+
+    file { '/etc/app/access.yml':
+        content =&gt; template('db_client/access.erb')
+    }
+}
+</pre>
+
+
+</div>
+
+</div>
+
+<div id="outline-container-23" class="outline-2">
+<h2 id="sec-23">Problems </h2>
+<div class="outline-text-2" id="text-23">
+
+<p>There are a few problems with that example
+</p><ul>
+<li>The username/password pair are repeated
+</li>
+<li>We are checking in passwords into source control
+</li>
+<li>It is difficult to configure dev environment differently
+</li>
+</ul>
+
+</div>
+
+</div>
+
+<div id="outline-container-24" class="outline-2">
+<h2 id="sec-24">One solution </h2>
+<div class="outline-text-2" id="text-24">
+
+<ul>
+<li>Production secret values out of source control
+</li>
+<li>Support different values for development/production
+</li>
+<li>As much data as possible with puppet module
+</li>
+</ul>
+
+</div>
+
+</div>
+
+<div id="outline-container-25" class="outline-2">
+<h2 id="sec-25">get_var &amp; get_secret &nbsp;&nbsp;&nbsp;<span class="tag"><span class="Incremental">Incremental</span></span></h2>
+<div class="outline-text-2" id="text-25">
+
+<ul>
+<li>A pair of Puppet functions we wrote and open sourced.
+</li>
+<li>Allows us to write more generic puppet modules, and control results
+  at run time
+</li>
+<li>Has facilities for running in dev environment, with development
+  configs transparently configured
+</li>
+<li>Production secrets like passwords and SSL certificates do not show
+  up in dev environments
+</li>
+<li>Avoid having to repeat information
+</li>
+</ul>
+
+</div>
+
+</div>
+
+<div id="outline-container-26" class="outline-2">
+<h2 id="sec-26">get_var </h2>
+<div class="outline-text-2" id="text-26">
+
+<ul>
+<li>Look in the module named <b>module</b> for a key named <b>key</b> and set
+  <b>$variable</b>
+</li>
+</ul>
+
+<pre class="example">
+$variable = get_var('module', 'key')
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-27" class="outline-2">
+<h2 id="sec-27">Module structure </h2>
+<div class="outline-text-2" id="text-27">
+
+
+
+
+<pre class="example">.
+├── README
+├── depends
+├── files
+├── manifests
+│   └── init.pp
+├── templates
+├── var             &lt;- production values
+│   └── main.yml
+└── var_dev         &lt;- development values
+    └── main.yml
+</pre>
+
+
+</div>
+
+</div>
+
+<div id="outline-container-28" class="outline-2">
+<h2 id="sec-28">File contents </h2>
+<div class="outline-text-2" id="text-28">
+
+<p>Just YAML
+</p>
+
+
+<pre class="example">---
+key: value
+</pre>
+
+
+</div>
+
+</div>
+
+<div id="outline-container-29" class="outline-2">
+<h2 id="sec-29">get_var again </h2>
+<div class="outline-text-2" id="text-29">
+
+<pre class="example">
+$variable = get_var('module', 'key')
+</pre>
+
+<ul>
+<li>In production, look in <b>module/var/main.yml</b>
+</li>
+<li>In dev, look in <b>module/var_dev/main.yml</b>
+</li>
+</ul>
+
+</div>
+
+</div>
+
+<div id="outline-container-30" class="outline-2">
+<h2 id="sec-30">Back to our database user </h2>
+<div class="outline-text-2" id="text-30">
+
+
+
+
+<pre class="example">class db_server {
+    $db_username = get_var('db_server','db_username')
+    $db_password = 'somethingreallyhardtotype'
+
+    db_user { $db_username:
+        ensure =&gt; present,
+        password =&gt; $db_password,
+    }
+}
+</pre>
+
+
+</div>
+
+</div>
+
+<div id="outline-container-31" class="outline-2">
+<h2 id="sec-31">Client configuration </h2>
+<div class="outline-text-2" id="text-31">
+
+
+
+
+<pre class="example">class app {
+    $db_username = get_var('db_server','db_username')
+    $db_password = 'somethingreallyhardtotype'
+
+    file { '/etc/app/access.yml':
+        content =&gt; template('db_client/access.erb')
+    }
+}
+</pre>
+
+
+
+<p>
+We'll get to that pesky password later
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-32" class="outline-2">
+<h2 id="sec-32">Other examples </h2>
+<div class="outline-text-2" id="text-32">
+
+<ul>
+<li>Configuring your webserver to run only a single worker in dev
+  environment
+</li>
+<li>Configuring log levels in development to log to the screen
+</li>
+<li>Maybe the website that sends customer emails sends them all to a
+  local mailbox 
+</li>
+</ul>
+
+</div>
+
+</div>
+
+<div id="outline-container-33" class="outline-2">
+<h2 id="sec-33">get_secret </h2>
+<div class="outline-text-2" id="text-33">
+
+<p>Looks like get_var
+</p><pre class="example">
+$password = get_secret('module','key')
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-34" class="outline-2">
+<h2 id="sec-34">Module structure </h2>
+<div class="outline-text-2" id="text-34">
+
+
+
+
+<pre class="example">.
+├── README
+├── depends
+├── files
+├── manifests
+│   └── init.pp
+├── templates
+└── secret_dev         &lt;- development values
+    └── main.yml
+</pre>
+
+
+</div>
+
+</div>
+
+<div id="outline-container-35" class="outline-2">
+<h2 id="sec-35">Production secrets </h2>
+<div class="outline-text-2" id="text-35">
+
+<ul>
+<li>Do not live in the module
+</li>
+<li>They live in <b>/etc/puppet/secret</b> on the puppetmasters
+</li>
+<li>The secrets on the puppetmasters are synced from a separate server
+</li>
+<li>Local changes to secrets on puppetmasters will be destroyed by this sync
+</li>
+</ul>
+
+</div>
+
+</div>
+
+<div id="outline-container-36" class="outline-2">
+<h2 id="sec-36">Back to our database user </h2>
+<div class="outline-text-2" id="text-36">
+
+
+
+
+<pre class="example">class db_server {
+    $db_username = get_var('db_server','db_username')
+    $db_password = get_secret('db_server','db_password)
+
+    db_user { $db_username:
+        ensure =&gt; present,
+        password =&gt; $db_password,
+    }
+}
+</pre>
+
+
+</div>
+
+</div>
+
+<div id="outline-container-37" class="outline-2">
+<h2 id="sec-37">Client configuration </h2>
+<div class="outline-text-2" id="text-37">
+
+
+
+
+<pre class="example">class app {
+    $db_username = get_var('db_server','db_username')
+    $db_password = get_secret('db_server','db_password)
+
+    file { '/etc/app/access.yml':
+        content =&gt; template('db_client/access.erb')
+    }
+}
+</pre>
+
+
+</div>
+
+</div>
+
+<div id="outline-container-38" class="outline-2">
+<h2 id="sec-38">Secrets - Development vs production </h2>
+<div class="outline-text-2" id="text-38">
+
+<p>Development:
+</p>
+<p>
+<b>db_server/secret_dev/main.yml</b>
+</p>
+
+
+<pre class="example">---
+db_password: letmein
+</pre>
+
+
+
+<p>
+Production:
+</p>
+<p>
+<b>/etc/puppet/secret/db_server/main.yml</b>
+</p>
+
+
+<pre class="example">---
+db_password: somethingreallyhardtotype
+</pre>
+
+
+</div>
+
+</div>
+
+<div id="outline-container-39" class="outline-2">
+<h2 id="sec-39">get_var/get_secret Pros </h2>
+<div class="outline-text-2" id="text-39">
+
+<ul>
+<li>Data is mostly kept with the puppet module 
+</li>
+<li>Clear divide between development &amp; production
+</li>
+</ul>
+
+</div>
+
+</div>
+
+<div id="outline-container-40" class="outline-2">
+<h2 id="sec-40">get_var/get_secret Cons </h2>
+<div class="outline-text-2" id="text-40">
+
+<ul>
+<li>Not included with puppet
+</li>
+<li>Need to duplicate var/var_dev values even if they are not different
+  in development environment.
+</li>
+</ul>
+
+</div>
+
+</div>
+
+<div id="outline-container-41" class="outline-2">
+<h2 id="sec-41">extlookup pros </h2>
+<div class="outline-text-2" id="text-41">
+
+<ul>
+<li>Included with puppet
+</li>
+</ul>
+
+</div>
+
+</div>
+
+<div id="outline-container-42" class="outline-2">
+<h2 id="sec-42">extlookup cons </h2>
+<div class="outline-text-2" id="text-42">
+
+<ul>
+<li>Data is managed separately from the puppet modules
+</li>
+</ul>
+
+</div>
+
+</div>
+
+<div id="outline-container-43" class="outline-2">
+<h2 id="sec-43">Questions? </h2>
+<div class="outline-text-2" id="text-43">
+
+</div>
+</div>
+</div>
+
+<div id="postamble">
+</div>
+</div>
+</body>
+</html>
