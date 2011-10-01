@@ -3,6 +3,7 @@
 Slides from my 'Puppet at Media Temple' presentation from [PuppetConf
 2011](http://puppetconf.com/).  Exported from org-mode using [org-s5](https://github.com/sigma/org-s5/).
 
+Check it out on GitHub pages [here](http://mrwacky42.github.com/puppetconf-2011/)
 # Copyright
 
 Copyright 2011 Sharif Nassar.
